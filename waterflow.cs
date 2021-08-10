@@ -4,7 +4,7 @@ using Oxide.Core.Libraries.Covalence;
 namespace Oxide.Plugins
 {
     [Info("WaterFlow", "3LECTR1C", "0.1.0")]
-    [Description("Various water related commands.")]
+    [Description("Ocean related commands for changing the water level")]
     public class waterflow : CovalencePlugin
     {
         private Timer ftimer;
