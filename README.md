@@ -1,6 +1,6 @@
 # WaterFlow
 
- WaterFlow is a rust plugin for oxide/umod with various water related commands.
+ WaterFlow is a rust plugin for oxide/umod with water level flood commands.
 
 ### Permissions
 ##### waterflow.use
