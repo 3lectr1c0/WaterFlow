@@ -9,30 +9,37 @@ namespace Oxide.Plugins
     {
         private Timer ftimer;
 
-        protected override void LoadDefaultMessages()
+
+        protected override void LoadDefaultMessages() // Localization
         {
             lang.RegisterMessages(new Dictionary<string, string>
             {
                 ["FloodStart"] = "The map is now flooding.",
                 ["FloodStop"] = "Flooding has stopped",
-                ["FloodAllStopped"] = "Flooding is already stopped.",
+                ["FloodAlStopped"] = "Flooding is already stopped.",
                 ["Reset"] = "Ocean level has reset.",
-                ["UnkCmd"] = "Unknown command, please use /wf help.",
-                ["HelpMenu"] = "===== HELP =====\n\n/wf help | Opens help menu\n\n/wf flood <Height> <Time> | Floods The map to a specific height for a duration of time (in seconds)\n\n/wf stop || Stops the flood\n\n/wf reset | Resets the water level\n\n===== HELP ====="
+                ["UkCmd"] = "Unknown command, please use /wf help.",
+                ["HelpMenu"] = "===== HELP =====\n\n/wf help | Opens help menu\n\n/wf flood <Height> <Time> | Floods The map to a specific height for a duration of time (in seconds)\n\n/wf stop | Stops the flood\n\n/wf reset | Resets the water level\n\n===== HELP =====",
+                ["FloodCmd"] = "flood",
+                ["StopCmd"] = "stop",
+                ["ResetCmd"] = "reset",
+                ["HelpCmd"] = "help"
             }, this);
         }
 
 
-        [Command("wf"), Permission("waterflow.use")]
+
+        [Command("wf"), Permission("waterflow.use")] // /wf command
         private void floodcmd(IPlayer player, string command, string[] func)
         {
             int initcmd = 0; // int for command to run
 
             // defines command number
-            if (func[0] == "help") initcmd = 0;
-            else if (func[0] == "flood") initcmd = 1;
-            else if (func[0] == "stop") initcmd = 1;
-            else if (func[0] == "reset") initcmd = 3;
+            if (func[0] == lang.GetMessage("HelpCmd", this, player.Id)) initcmd = 0;
+            else if (func[0] == lang.GetMessage("FloodCmd", this, player.Id)) initcmd = 1;
+            else if (func[0] == lang.GetMessage("StopCmd", this, player.Id)) initcmd = 2;
+            else if (func[0] == lang.GetMessage("ResetCmd", this, player.Id)) initcmd = 3;
+            else player.Reply(lang.GetMessage("UkCmd", this, player.Id));
 
 
 
@@ -57,9 +64,8 @@ namespace Oxide.Plugins
                         newadd = upheight / seconds; // sets rate for time
 
                         // Up
-                        ftimer = timer.Every(1, () =>
+                        ftimer = timer.Every(1, () => // every second add calculated height
                         {
-                            player.Reply("up");
                             if (WaterSystem.OceanLevel >= height) ftimer.Destroy();
                             else addolevel(newadd);
                         });
@@ -69,10 +75,9 @@ namespace Oxide.Plugins
                     if(WaterSystem.OceanLevel > height)
                     {
                         // down
-                        player.Reply("down");
                         newadd = downheight / seconds; // sets rate for time
 
-                        ftimer = timer.Every(1, () =>
+                        ftimer = timer.Every(1, () => // every second remove calculated height
                         {
                             if (WaterSystem.OceanLevel <= height) ftimer.Destroy();
                             else takeolevel(newadd);
@@ -82,29 +87,43 @@ namespace Oxide.Plugins
 
                     break;
                 case 2: // stop command
-                    ftimer.Destroy();
-                    break;
+                    if(ftimer.Destroyed == true)
+                    {
+                        player.Reply(lang.GetMessage("IsAlStopped", this, player.Id));
+                        break;
+                    }
+                    else
+                    {
+                        ftimer.Destroy();
+                        player.Reply(lang.GetMessage("FloodStop", this, player.Id));
+                        break;
+                    }
+
                 case 3: // reset command
                     resetolevel();
+                    player.Reply(lang.GetMessage("Reset", this, player.Id));
                     break;
             }
 
         }
         
-
+        // adds water
         private void addolevel(double oceanlevel)
         {
             server.Command("meta.add", "oceanlevel", oceanlevel.ToString());
         }
+        // takes water
         private void takeolevel(double oceanlevel)
         {
             oceanlevel = oceanlevel * -1;
             server.Command("meta.add", "oceanlevel", oceanlevel.ToString());
         }
+        // sets water (unused)
         private void setolevel(double oceanlevel)
         {
             server.Command("oceanlevel", oceanlevel.ToString());
         }
+        // resets water
         private void resetolevel()
         {
             server.Command("oceanlevel", "0");
