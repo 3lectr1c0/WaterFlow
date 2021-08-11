@@ -3,7 +3,7 @@ using Oxide.Core.Libraries.Covalence;
 
 namespace Oxide.Plugins
 {
-    [Info("WaterFlow", "3LECTR1C", "0.1.0")]
+    [Info("WaterFlow", "3LECTR1C", "0.1.1")]
     [Description("Ocean related commands for changing the water level")]
     public class waterflow : CovalencePlugin
     {
@@ -15,6 +15,7 @@ namespace Oxide.Plugins
             lang.RegisterMessages(new Dictionary<string, string>
             {
                 ["FloodStart"] = "The map is now flooding.",
+                ["WaterDown"] = "The water is receding.",
                 ["FloodStop"] = "Flooding has stopped",
                 ["FloodAlStopped"] = "Flooding is already stopped.",
                 ["Reset"] = "Ocean level has reset.",
@@ -50,7 +51,6 @@ namespace Oxide.Plugins
                     player.Reply(lang.GetMessage("HelpMenu", this, player.Id));
                     break;
                 case 1:// flood command
-                    player.Reply(lang.GetMessage("FloodStart", this, player.Id));
                     double height = int.Parse(func[1]);
                     double seconds = int.Parse(func[2]);
 
@@ -63,6 +63,8 @@ namespace Oxide.Plugins
                     {
                         newadd = upheight / seconds; // sets rate for time
 
+                        player.Reply(lang.GetMessage("FloodStart", this, player.Id));
+
                         // Up
                         ftimer = timer.Every(1, () => // every second add calculated height
                         {
@@ -74,6 +76,7 @@ namespace Oxide.Plugins
 
                     if(WaterSystem.OceanLevel > height)
                     {
+                        player.Reply(lang.GetMessage("FloodDown", this, player.Id));
                         // down
                         newadd = downheight / seconds; // sets rate for time
 
